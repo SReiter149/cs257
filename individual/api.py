@@ -10,6 +10,7 @@ import argparse
 import flask
 import json
 import csv
+import pandas as pd
 
 app = flask.Flask(__name__)
 
@@ -29,7 +30,24 @@ def getAlbum(albumName):
         for row in reader:
             if row["album"].lower() == albumName.lower():
                 songs[len(songs.keys()) + 1] = row['title']
-    return json.dumps(songs)
+    return json.dumps(songs, ensure_ascii=False)
+
+@app.route("/song/<songName>")
+def getSong(songName):
+    songs = []
+    with open('../data/songs.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row["title"].lower() == songName.lower():
+                song = {}
+                song["album"] = row["album"]
+                song["length"] = row["length"]
+                song["title"] = row["title"]
+                song["artist"] = row["artist"]
+                song["tracknumber"] = row["tracknumber"]
+                song["date"] = row["date"]
+                songs.append(song)
+    return json.dumps(songs, ensure_ascii=False)
 
 @app.route('/help')
 def get_help():
